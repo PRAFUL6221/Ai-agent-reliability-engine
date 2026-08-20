@@ -23,28 +23,27 @@ if "batch" not in st.session_state:
     st.session_state.batch = None
 
 with st.sidebar:
-    st.header("⚙️ Configuration")
-    try:
-        from groq import Groq
-        k = get_groq_status()
-        if k["available"]:
-            client = Groq(api_key=agent.api_key())
-            raw_models = [m.id for m in client.models.list().data if "llama" in m.id]
-            available_models = raw_models if raw_models else ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-        else:
-            available_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-    except Exception:
-        available_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-
-    model = st.selectbox("Groq/Llama model", available_models)
-    temp = st.slider("Agent temperature", 0.0, 1.0, 0.2, 0.1)
-    judge = st.toggle("LLM-as-a-Judge", True)
-    status = get_groq_status()
-    (st.success if status["available"] else st.warning)("Groq API connected" if status["available"] else "Groq API not configured")
-    st.caption("Weights: Accuracy 35% • Grounding 25% • Consistency 20% • Safety 20%")
-
-single, suite, dash, red, info = st.tabs(["🧪 Single Evaluation", "📋 Test Suite", "📊 Dashboard", "🛡️ Red Team", "ℹ️ Methodology"])
-
+  st.header("⚙️ Configuration")
+  model = st.selectbox(
+      "Groq/Llama model",
+      [
+          "llama-3.3-70b-versatile",
+          "llama-3.1-8b-instant",
+          "llama3-70b-8192",
+          "llama3-8b-8192",
+      ],
+  )
+  temp = st.slider("Agent temperature", 0.0, 1.0, 0.2, 0.1)
+  judge = st.toggle("LLM-as-a-Judge", True)
+  status = get_groq_status()
+  (st.success if status["available"] else st.warning)(
+      "Groq API connected"
+      if status["available"]
+      else "Groq API not configured"
+  )
+  st.caption(
+      "Weights: Accuracy 35% • Grounding 25% • Consistency 20% • Safety 20%"
+  )
 with single:
     st.subheader("Evaluate one AI-agent response")
     a, b = st.columns(2)
