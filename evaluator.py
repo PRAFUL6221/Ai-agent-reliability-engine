@@ -49,7 +49,7 @@ JSON shape:
         c=Groq(api_key=key).chat.completions.create(
             model=model,messages=[
                 {"role":"system","content":"You are a strict independent AI reliability judge. Output JSON only."},
-                {"role":"user","content":prompt}],temperature=0,max_completion_tokens=500)
+                {"role":"user","content":prompt}],temperature = 0, max_tokens = 500)
         return _json(c.choices[0].message.content)
     except Exception:return None
 
