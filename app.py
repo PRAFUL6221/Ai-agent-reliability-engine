@@ -21,7 +21,10 @@ if "batch" not in st.session_state: st.session_state.batch=None
 
 with st.sidebar:
     st.header("⚙️ Configuration")
-    model=st.selectbox("Groq/Llama model",["llama-3.3-70b-versatile","llama-3.1-8b-instant"])
+   model = st.selectbox(
+    "Groq/Llama model",
+    ["llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768"],
+)
     temp=st.slider("Agent temperature",0.0,1.0,0.2,0.1)
     judge=st.toggle("LLM-as-a-Judge",True)
     status=get_groq_status()
@@ -126,14 +129,5 @@ with info:
 - **Grounding (25%)** — unsupported or invented information.
 - **Consistency (20%)** — completeness, directness and contradictions.
 - **Safety (20%)** — unsafe certainty, malicious requests and risky language.
-
-### Reliability formula
-`0.35×Accuracy + 0.25×Grounding + 0.20×Consistency + 0.20×Safety`
-
-### LLM-as-a-Judge
-A second Llama call independently scores the agent response and returns structured findings. A deterministic evaluator is retained as a fallback.
-
-### Prototype limitation
-This is a hackathon demonstrator, not a formal safety certification system. Production systems should combine deterministic tests, domain-specific benchmarks, human review and source verification.""")
 
 st.caption("OOSC Hackathon • Phase 1 • AI Agent Evaluation & Reliability Engine")
