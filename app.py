@@ -23,7 +23,7 @@ if "batch" not in st.session_state:
 
 with st.sidebar:
     st.header("⚙️ Configuration")
-    model = st.selectbox("Groq/Llama model", ["llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768"])
+    model = st.selectbox("Groq/Llama model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
     temp = st.slider("Agent temperature", 0.0, 1.0, 0.2, 0.1)
     judge = st.toggle("LLM-as-a-Judge", True)
     status = get_groq_status()
