@@ -3,18 +3,19 @@ from datetime import datetime
 from pathlib import Path
 import pandas as pd
 import streamlit as st
+import agent
 from agent import generate_agent_response, get_groq_status
 from evaluator import evaluate_response, build_report
 
 st.set_page_config(page_title="AI Agent Reliability Engine", page_icon="🤖", layout="wide")
 st.markdown("""<style>
 .block-container{max-width:1400px;padding-top:1.5rem}
-.hero{padding:1.5rem;border-radius:18px;background:linear-gradient(135deg,#101827,#173452);color:white;margin-bottom:1rem}
-.hero h1{margin:0}.hero p{color:#c9d7e8}
+.hero{padding:1.5rem;border-radius:14px;background:linear-gradient(135deg,#101827,#173452);color:white;margin-bottom:1rem}
+.hero h1{margin:0;font-size:1.8rem}.hero p{color:#c9d7e8;margin:0.3rem 0 0 0}
 </style>""", unsafe_allow_html=True)
 
 st.markdown("""<div class="hero"><h1>🤖 AI Agent Evaluation & Reliability Engine</h1>
-<p>Measure whether an AI agent is accurate, grounded, consistent and safe before deployment.</p></div>""", unsafe_allow_html=True)
+<p>Enterprise scoring framework to evaluate agent accuracy, grounding, consistency, and safety before deployment.</p></div>""", unsafe_allow_html=True)
 
 if "history" not in st.session_state: 
     st.session_state.history = []
@@ -23,7 +24,19 @@ if "batch" not in st.session_state:
 
 with st.sidebar:
     st.header("⚙️ Configuration")
-    model = st.selectbox("Groq/Llama model", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
+    try:
+        from groq import Groq
+        k = get_groq_status()
+        if k["available"]:
+            client = Groq(api_key=agent.api_key())
+            raw_models = [m.id for m in client.models.list().data if "llama" in m.id]
+            available_models = raw_models if raw_models else ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        else:
+            available_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    except Exception:
+        available_models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+
+    model = st.selectbox("Groq/Llama model", available_models)
     temp = st.slider("Agent temperature", 0.0, 1.0, 0.2, 0.1)
     judge = st.toggle("LLM-as-a-Judge", True)
     status = get_groq_status()
@@ -43,13 +56,13 @@ with single:
         resp = st.text_area("Agent response", "The capital of France is Paris.", height=110) if mode == "Enter response manually" else ""
     if st.button("🚀 Run Evaluation", type="primary", use_container_width=True):
         if mode == "Generate with Groq/Llama":
-            with st.spinner("Generating with Llama..."):
+            with st.spinner("Generating response..."):
                 g = generate_agent_response(q, model, temp)
             if not g["ok"]: 
                 st.error(g["error"])
                 st.stop()
             resp = g["text"]
-        with st.spinner("Evaluating..."):
+        with st.spinner("Evaluating response..."):
             r = evaluate_response(q, ref, resp, judge, model)
         st.session_state.history.append({"timestamp": datetime.now().isoformat(timespec="seconds"), "question": q, "response": resp, **r})
         st.success(f"Reliability Score: {r['overall_score']}/100 — {r['grade']}")
@@ -72,7 +85,8 @@ with single:
 
 with suite:
     st.subheader("Automated Test Suite")
-    default = json.loads(Path("data/sample_test_suite.json").read_text())
+    default_path = Path("data/sample_test_suite.json")
+    default = json.loads(default_path.read_text()) if default_path.exists() else []
     up = st.file_uploader("Upload custom JSON suite", type="json")
     cases = json.loads(up.read().decode()) if up else default
     st.write(f"**{len(cases)} cases loaded**")
@@ -122,7 +136,8 @@ with dash:
 
 with red:
     st.subheader("🛡️ Red-Team Reliability Checks")
-    cases = json.loads(Path("data/red_team_suite.json").read_text())
+    red_path = Path("data/red_team_suite.json")
+    cases = json.loads(red_path.read_text()) if red_path.exists() else []
     for c in cases:
         with st.expander(f"{c['id']} • {c['category']}"): 
             st.write(c["question"])
@@ -143,18 +158,13 @@ with red:
 with info:
     st.subheader("Methodology")
     st.markdown("""### Evaluation dimensions
-- **Accuracy (35%)** — alignment with the reference answer.
-- **Grounding (25%)** — unsupported or invented information.
-- **Consistency (20%)** — completeness, directness and contradictions.
-- **Safety (20%)** — unsafe certainty, malicious requests and risky language.
+- **Accuracy (35%)** — Lexical and semantic correspondence to the reference ground truth.
+- **Grounding (25%)** — Absence of unsupported facts, extrapolations, or hallucinations.
+- **Consistency (20%)** — Structural completion, directness, and internal coherence.
+- **Safety (20%)** — Robustness against prompt leakage, jailbreaks, and overconfident assertion.
 
-### Reliability formula
-`0.35×Accuracy + 0.25×Grounding + 0.20×Consistency + 0.20×Safety`
+### Reliability Formula
+$$0.35 \\times \\text{Accuracy} + 0.25 \\times \\text{Grounding} + 0.20 \\times \\text{Consistency} + 0.20 \\times \\text{Safety}$$
 
-### LLM-as-a-Judge
-A second Llama call independently scores the agent response and returns structured findings. A deterministic evaluator is retained as a fallback.
-
-### Prototype limitation
-This is a hackathon demonstrator, not a formal safety certification system. Production systems should combine deterministic tests, domain-specific benchmarks, human review and source verification.""")
-
-st.caption("OOSC Hackathon • Phase 1 • AI Agent Evaluation & Reliability Engine")
+### Architecture
+Combines an LLM-as-a-Judge semantic parsing layer with a deterministic regex and token overlap fallback engine.""")
