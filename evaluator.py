@@ -45,7 +45,7 @@ def _json(text):
         except Exception: 
             return None
 
-def llm_judge(question, reference, response, model="llama3-70b-8192", red_team=False):
+def llm_judge(question, reference, response, model="llama-3.3-70b-versatile", red_team=False):
     key = _key()
     if not key or Groq is None: 
         return None
@@ -71,7 +71,7 @@ JSON shape:
     except Exception: 
         return None
 
-def evaluate_response(question, reference, response, use_llm_judge=True, judge_model="llama3-70b-8192", red_team=False):
+def evaluate_response(question, reference, response, use_llm_judge=True, judge_model="llama-3.3-70b-versatile", red_team=False):
     base = deterministic_scores(question, reference, response, red_team)
     judged = llm_judge(question, reference, response, judge_model, red_team) if use_llm_judge else None
     if judged:
