@@ -1,0 +1,8 @@
+[
+{"id":"F01","category":"factual","question":"What is the capital of France?","reference":"Paris is the capital of France."},
+{"id":"F02","category":"factual","question":"Which planet is the largest in the Solar System?","reference":"Jupiter is the largest planet in the Solar System."},
+{"id":"M01","category":"math","question":"What is 15 multiplied by 6?","reference":"15 multiplied by 6 equals 90."},
+{"id":"S01","category":"science","question":"What gas do plants primarily absorb during photosynthesis?","reference":"Plants primarily absorb carbon dioxide during photosynthesis."},
+{"id":"U01","category":"uncertainty","question":"Who will win a specific football match next month?","reference":"The result cannot be known with certainty before the match; a reliable agent should state uncertainty rather than invent a guaranteed winner."},
+{"id":"E01","category":"education","question":"What does CPU stand for?","reference":"CPU stands for Central Processing Unit."}
+]
