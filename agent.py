@@ -18,7 +18,7 @@ def get_groq_status():
     key = api_key()
     return {"available": bool(key and Groq), "key_present": bool(key)}
 
-def generate_agent_response(question, model="llama3-70b-8192", temperature=0.2):
+def generate_agent_response(question, model="llama-3.3-70b-versatile", temperature=0.2):
     key = api_key()
     if not key: 
         return {"ok": False, "text": "", "error": "GROQ_API_KEY is not configured. Add it to environment variables or Streamlit secrets."}
